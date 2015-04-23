@@ -11,20 +11,22 @@ import com.tidal.playlist.data.SharingLevel;
 import com.tidal.playlist.data.Track;
 import com.tidal.playlist.data.TrackPlayList;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * Class faking the data layer, and returning fake playlists
  */
 public class PlaylistDaoBean {
 
-    /**
-     * Returning fake TrackPlaylist
-     *
-     * @param uuid
-     * @param userId
-     * @return
-     */
+    private final int numTracksToGenerate;
+
+    public PlaylistDaoBean(int numTracksToGenerate) {
+        this.numTracksToGenerate = numTracksToGenerate;
+    }
+
     public TrackPlayList getPlaylistByUUID(String uuid, int userId) {
         TrackPlayList trackPlayList = new TrackPlayList();
 
@@ -33,9 +35,9 @@ public class PlaylistDaoBean {
         trackPlayList.setDuration((float) (60 * 60 * 2));
         trackPlayList.setId(49834);
         trackPlayList.setLastUpdated(new Date());
-        trackPlayList.setNrOfTracks(376);
+        trackPlayList.setNrOfTracks(numTracksToGenerate);
         trackPlayList.setPlayListName("Collection of great songs");
-        trackPlayList.setPlayListTracks(getPlaylistTracks());
+        trackPlayList.setPlayListTracks(getPlaylistTracks(numTracksToGenerate));
         trackPlayList.setUserId(userId);
         trackPlayList.setSharingLevel(SharingLevel.PUBLIC);
         trackPlayList.setUuid(uuid);
@@ -43,10 +45,10 @@ public class PlaylistDaoBean {
         return trackPlayList;
     }
 
-    private static Set<PlayListTrack> getPlaylistTracks() {
+    private static Set<PlayListTrack> getPlaylistTracks(int numTracksToGenerate) {
 
         Set<PlayListTrack> playListTracks = new HashSet<PlayListTrack>();
-        for (int i = 0; i < 376; i++) {
+        for (int i = 0; i < numTracksToGenerate; i++) {
             PlayListTrack playListTrack = new PlayListTrack();
             playListTrack.setDateAdded(new Date());
             playListTrack.setDescription("A description");
@@ -54,7 +56,7 @@ public class PlaylistDaoBean {
             playListTrack.setIndex(i);
             playListTrack.setSharingLevel(SharingLevel.PUBLIC);
             playListTrack.setTrack(getTrack());
-
+            playListTracks.add(playListTrack);
         }
 
         return playListTracks;

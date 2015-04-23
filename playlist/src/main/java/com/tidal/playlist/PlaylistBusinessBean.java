@@ -11,9 +11,11 @@ import java.util.*;
 public class PlaylistBusinessBean {
 
     private PlaylistDaoBean playlistDaoBean;
+    private int maxNumTracks;
 
-    public PlaylistBusinessBean(PlaylistDaoBean playlistDaoBean) {
+    public PlaylistBusinessBean(PlaylistDaoBean playlistDaoBean, int maxNumTracks) {
         this.playlistDaoBean = playlistDaoBean;
+        this.maxNumTracks = maxNumTracks;
     }
 
     List<PlayListTrack> addTracks(String uuid, int userId, List<Track> tracksToAdd, int toIndex,
@@ -23,9 +25,8 @@ public class PlaylistBusinessBean {
 
             TrackPlayList playList = playlistDaoBean.getPlaylistByUUID(uuid, userId);
 
-            //We do not allow > 500 tracks in new playlists
-            if (playList.getNrOfTracks() + tracksToAdd.size() > 500) {
-                throw new PlaylistException("Playlist cannot have more than " + 500 + " tracks");
+            if (playList.getNrOfTracks() + tracksToAdd.size() > maxNumTracks) {
+                throw new PlaylistException("Playlist cannot have more than " + maxNumTracks + " tracks");
             }
 
             // The index is out of bounds, put it in the end of the list.
