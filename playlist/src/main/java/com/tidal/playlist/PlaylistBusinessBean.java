@@ -47,18 +47,14 @@ public class PlaylistBusinessBean {
 
             Collections.sort(original);
 
-            List<PlayListTrack> added = new ArrayList<PlayListTrack>(tracksToAdd.size());
-
             for (Track track : tracksToAdd) {
                 PlayListTrack playlistTrack = new PlayListTrack();
                 playlistTrack.setTrack(track);
                 playlistTrack.setTrackPlaylist(playList);
                 playlistTrack.setTrackArtistId(track.getArtistId());
                 playlistTrack.setDateAdded(lastUpdated);
-                playlistTrack.setTrack(track);
                 playList.setDuration(addTrackDurationToPlaylist(playList, track));
                 original.add(toIndex, playlistTrack);
-                added.add(playlistTrack);
                 toIndex++;
             }
 
@@ -71,7 +67,7 @@ public class PlaylistBusinessBean {
             playList.getPlayListTracks().addAll(original);
             playList.setNrOfTracks(original.size());
 
-            return added;
+            return original;
 
         } catch (Exception e) {
             e.printStackTrace();
