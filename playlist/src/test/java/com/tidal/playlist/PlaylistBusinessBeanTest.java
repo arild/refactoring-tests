@@ -1,11 +1,10 @@
 package com.tidal.playlist;
 
-import com.google.inject.Inject;
+import com.tidal.playlist.dao.PlaylistDaoBean;
 import com.tidal.playlist.data.PlayListTrack;
 import com.tidal.playlist.data.Track;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -15,16 +14,8 @@ import java.util.UUID;
 
 import static org.testng.AssertJUnit.assertTrue;
 
-/**
- * @author: eivind.hognestad@wimpmusic.com
- * Date: 15.04.15
- * Time: 14.32
- */
-@Guice(modules = TestBusinessModule.class)
-public class PlaylistBusinessBeanTest {
 
-    @Inject
-    PlaylistBusinessBean playlistBusinessBean;
+public class PlaylistBusinessBeanTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -48,7 +39,7 @@ public class PlaylistBusinessBeanTest {
 
         trackList.add(track);
 
-        List<PlayListTrack> playListTracks = playlistBusinessBean.addTracks(UUID.randomUUID().toString(), 1, trackList, 5, new Date());
+        List<PlayListTrack> playListTracks = new PlaylistBusinessBean(new PlaylistDaoBean()).addTracks(UUID.randomUUID().toString(), 1, trackList, 5, new Date());
 
         assertTrue(playListTracks.size() > 0);
     }

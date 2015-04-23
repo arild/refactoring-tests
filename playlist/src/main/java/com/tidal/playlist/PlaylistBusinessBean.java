@@ -1,6 +1,5 @@
 package com.tidal.playlist;
 
-import com.google.inject.Inject;
 import com.tidal.playlist.dao.PlaylistDaoBean;
 import com.tidal.playlist.data.PlayListTrack;
 import com.tidal.playlist.data.Track;
@@ -9,17 +8,11 @@ import com.tidal.playlist.exception.PlaylistException;
 
 import java.util.*;
 
-/**
- * @author: eivind.hognestad@wimpmusic.com
- * Date: 15.04.15
- * Time: 12.45
- */
 public class PlaylistBusinessBean {
 
     private PlaylistDaoBean playlistDaoBean;
 
-    @Inject
-    public PlaylistBusinessBean(PlaylistDaoBean playlistDaoBean){
+    public PlaylistBusinessBean(PlaylistDaoBean playlistDaoBean) {
         this.playlistDaoBean = playlistDaoBean;
     }
 
