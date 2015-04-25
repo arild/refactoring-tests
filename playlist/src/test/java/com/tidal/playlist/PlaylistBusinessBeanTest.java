@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 
@@ -25,8 +26,9 @@ public class PlaylistBusinessBeanTest {
 
         int maxNumTracks = 10;
         int numTracksToGenerate = 0;
-        List<PlayListTrack> playListTracks = playlistBean(maxNumTracks, numTracksToGenerate)
-                .addTracks(trackList, 0, new Date());
+        int toIndex = 0;
+        List<PlayListTrack> playListTracks = playlistBusinessBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, toIndex, new Date()).getPlayList().getPlayListTracksSorted();
 
         assertThat(playListTracks.size(), is(1));
         assertThat(playListTracks.get(0).getTrack().getId(), is(100));
@@ -44,8 +46,9 @@ public class PlaylistBusinessBeanTest {
 
         int maxNumTracks = 10;
         int numTracksToGenerate = 0;
-        List<PlayListTrack> playListTracks = playlistBean(maxNumTracks, numTracksToGenerate)
-                .addTracks(trackList, 0, new Date());
+        int toIndex = 0;
+        List<PlayListTrack> playListTracks = playlistBusinessBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, toIndex, new Date()).getPlayList().getPlayListTracksSorted();
 
         assertThat(playListTracks.size(), is(2));
         assertThat(playListTracks.get(0).getTrack().getId(), is(100));
@@ -60,8 +63,9 @@ public class PlaylistBusinessBeanTest {
 
         int maxNumTracks = 10;
         int numTracksToGenerate = 2;
-        List<PlayListTrack> playListTracks = playlistBean(maxNumTracks, numTracksToGenerate)
-                .addTracks(trackList, 0, new Date());
+        int toIndex = 0;
+        List<PlayListTrack> playListTracks = playlistBusinessBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, toIndex, new Date()).getPlayList().getPlayListTracksSorted();
 
         assertThat(playListTracks.size(), is(3));
         assertThat(playListTracks.get(0).getTrack().getId(), is(100));
@@ -75,8 +79,9 @@ public class PlaylistBusinessBeanTest {
 
         int maxNumTracks = 10;
         int numTracksToGenerate = 2;
-        List<PlayListTrack> playListTracks = playlistBean(maxNumTracks, numTracksToGenerate)
-                .addTracks(trackList, 1, new Date());
+        int toIndex = 1;
+        List<PlayListTrack> playListTracks = playlistBusinessBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, toIndex, new Date()).getPlayList().getPlayListTracksSorted();
 
         assertThat(playListTracks.size(), is(3));
         assertThat(playListTracks.get(1).getTrack().getId(), is(100));
@@ -90,8 +95,9 @@ public class PlaylistBusinessBeanTest {
 
         int maxNumTracks = 10;
         int numTracksToGenerate = 2;
-        List<PlayListTrack> playListTracks = playlistBean(maxNumTracks, numTracksToGenerate)
-                .addTracks(trackList, 2, new Date());
+        int toIndex = 2;
+        List<PlayListTrack> playListTracks = playlistBusinessBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, toIndex, new Date()).getPlayList().getPlayListTracksSorted();
 
         assertThat(playListTracks.size(), is(3));
         assertThat(playListTracks.get(2).getTrack().getId(), is(100));
@@ -103,8 +109,9 @@ public class PlaylistBusinessBeanTest {
 
         int numTracksToGenerate = 10;
         int maxNumTracks = 10;
-        playlistBean(maxNumTracks, numTracksToGenerate)
-                .addTracks(trackList, 1, new Date());
+        int toIndex = 1;
+        playlistBusinessBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, toIndex, new Date()).getPlayList().getPlayListTracksSorted();
     }
 
     @Test
@@ -113,7 +120,9 @@ public class PlaylistBusinessBeanTest {
 
         int maxNumTracks = 10;
         int numTracksToGenerate = 5;
-        playlistBean(maxNumTracks, numTracksToGenerate).addTracks(trackList, 5, new Date());
+        int toIndex = 5;
+        playlistBusinessBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, toIndex, new Date()).getPlayList().getPlayListTracksSorted();
     }
 
     @Test(expected = PlaylistException.class)
@@ -122,8 +131,9 @@ public class PlaylistBusinessBeanTest {
 
         int maxNumTracks = 10;
         int numTracksToGenerate = 5;
-        playlistBean(maxNumTracks, numTracksToGenerate).addTracks(trackList, -10, new Date());
-
+        int toIndex = -10;
+        playlistBusinessBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, toIndex, new Date()).getPlayList().getPlayListTracksSorted();
     }
 
     @Test
@@ -134,12 +144,33 @@ public class PlaylistBusinessBeanTest {
 
         int maxNumTracks = 10;
         int numTracksToGenerate = 5;
-        List<PlayListTrack> playListTracks = playlistBean(maxNumTracks, numTracksToGenerate)
-                .addTracks(trackList, 20, new Date());
+        int toIndex = 20;
+        List<PlayListTrack> playListTracks = playlistBusinessBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, toIndex, new Date()).getPlayList().getPlayListTracksSorted();
 
         assertThat(playListTracks.size(), is(6));
         assertThat(playListTracks.get(5).getTrack().getId(), is(100));
+    }
 
+    @Test
+    public void updatesDurationOnPlaylist() throws Exception {
+        int maxNumTracks = 10;
+        int numTracksToGenerate = 2;
+        PlaylistBusinessBean playListBean = playlistBusinessBean(maxNumTracks, numTracksToGenerate);
+
+        Float durationBefore = playListBean.getPlayList().getDuration();
+
+        Track track = track();
+        track.setId(100);
+        track.setDuration(2.f);
+        List<Track> trackList = asList(track);
+
+        int toIndex = 1;
+        Float duration = playListBean.addTracks(trackList, toIndex, new Date())
+                .getPlayList()
+                .getDuration();
+
+        assertEquals(durationBefore + 2.f, duration, 0.1f);
     }
 
     private Track track() {
@@ -148,10 +179,15 @@ public class PlaylistBusinessBeanTest {
         track.setTitle("A brand new track");
         track.setTrackNumberIdx(1);
         track.setId(100);
+        track.setDuration((float)1.);
         return track;
     }
 
-    private PlaylistBusinessBean playlistBean(int maxNumTracks, int numTracksToGenerate) {
-        return new PlaylistBusinessBean(1, UUID.randomUUID().toString(), new PlaylistDaoBean(numTracksToGenerate), maxNumTracks);
+    private PlaylistBusinessBean playlistBusinessBean(int maxNumTracks, int numTracksToGenerate) {
+        return new PlaylistBusinessBean(1, UUID.randomUUID().toString(), playlistDaoBean(numTracksToGenerate), maxNumTracks);
+    }
+
+    private PlaylistDaoBean playlistDaoBean(int numTracksToGenerate) {
+        return new PlaylistDaoBean(numTracksToGenerate);
     }
 }

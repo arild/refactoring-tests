@@ -6,27 +6,30 @@ import com.tidal.playlist.data.Track;
 import com.tidal.playlist.data.TrackPlayList;
 import com.tidal.playlist.exception.PlaylistException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class PlaylistBusinessBean {
 
-    private final int userId;
-    private final String uuid;
-    private PlaylistDaoBean playlistDaoBean;
+    private final TrackPlayList playList;
     private int maxNumTracks;
 
     public PlaylistBusinessBean(int userId, String uuid, PlaylistDaoBean playlistDaoBean, int maxNumTracks) {
-        this.userId = userId;
-        this.uuid = uuid;
-        this.playlistDaoBean = playlistDaoBean;
         this.maxNumTracks = maxNumTracks;
+
+        // This would normally be called for each operation modifying the playlist, .e.g addTracks()
+        // At the end of each such operation, there would also be storing operation.
+        // For now, just load the playlist and modify it in memory.
+        playList = playlistDaoBean.getPlaylistByUUID(uuid, userId);
     }
 
-    List<PlayListTrack> addTracks(List<Track> tracksToAdd, int toIndex, Date lastUpdated) throws PlaylistException {
+    public TrackPlayList getPlayList() {
+        return playList;
+    }
 
+    PlaylistBusinessBean addTracks(List<Track> tracksToAdd, int toIndex, Date lastUpdated) throws PlaylistException {
         try {
-            TrackPlayList playList = playlistDaoBean.getPlaylistByUUID(uuid, userId);
-
             if (isPlaylistFull(playList, tracksToAdd, maxNumTracks)) {
                 throw new PlaylistException("Playlist cannot have more than " + maxNumTracks + " tracks");
             }
@@ -37,23 +40,11 @@ public class PlaylistBusinessBean {
                 throw new PlaylistException("Playlist index is invalid. Can not add to index " + toIndex);
             }
 
-            Set<PlayListTrack> originalSet = playList.getPlayListTracks();
-            List<PlayListTrack> original;
-            if (originalSet == null || originalSet.size() == 0)
-                original = new ArrayList<PlayListTrack>();
-            else
-                original = new ArrayList<PlayListTrack>(originalSet);
-
-            Collections.sort(original);
+            List<PlayListTrack> original = getOriginalPlayListTracksSorted(playList);
 
             for (Track track : tracksToAdd) {
-                PlayListTrack playlistTrack = new PlayListTrack();
-                playlistTrack.setTrack(track);
-                playlistTrack.setTrackPlaylist(playList);
-                playlistTrack.setTrackArtistId(track.getArtistId());
-                playlistTrack.setDateAdded(lastUpdated);
+                original.add(toIndex, createPlayListTrack(lastUpdated, playList, track));
                 playList.setDuration(addTrackDurationToPlaylist(playList, track));
-                original.add(toIndex, playlistTrack);
                 toIndex++;
             }
 
@@ -66,11 +57,30 @@ public class PlaylistBusinessBean {
             playList.getPlayListTracks().addAll(original);
             playList.setNrOfTracks(original.size());
 
-            return original;
+            return this;
 
         } catch (Exception e) {
             e.printStackTrace();
             throw new PlaylistException("Generic error");
+        }
+    }
+
+    private PlayListTrack createPlayListTrack(Date lastUpdated, TrackPlayList playList, Track track) {
+        PlayListTrack playlistTrack = new PlayListTrack();
+        playlistTrack.setTrack(track);
+        playlistTrack.setTrackPlaylist(playList);
+        playlistTrack.setTrackArtistId(track.getArtistId());
+        playlistTrack.setDateAdded(lastUpdated);
+        return playlistTrack;
+    }
+
+    private List<PlayListTrack> getOriginalPlayListTracksSorted(TrackPlayList playList) {
+        List<PlayListTrack> original = playList.getPlayListTracksSorted();
+        if (original == null) {
+            return new ArrayList<PlayListTrack>();
+        }
+        else {
+            return original;
         }
     }
 

@@ -1,9 +1,6 @@
 package com.tidal.playlist.data;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 
 /**
@@ -211,5 +208,16 @@ public class TrackPlayList {
 
     public void setImageSources(String imageSources) {
         this.imageSources = imageSources;
+    }
+
+    public List<PlayListTrack> getPlayListTracksSorted() {
+        if (getPlayListTracks() == null) {
+            return null;
+        }
+        else {
+            ArrayList<PlayListTrack> playListTracks = new ArrayList<PlayListTrack>(getPlayListTracks());
+            Collections.sort(playListTracks);
+            return playListTracks;
+        }
     }
 }
