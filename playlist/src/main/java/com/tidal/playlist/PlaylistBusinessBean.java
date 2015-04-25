@@ -9,6 +9,7 @@ import com.tidal.playlist.exception.PlaylistException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public class PlaylistBusinessBean {
 
@@ -55,6 +56,23 @@ public class PlaylistBusinessBean {
         playList.setNrOfTracks(original.size());
 
         return this;
+    }
+
+    PlaylistBusinessBean deleteTracks(List<Integer> playListTrackIdsToDelete) {
+        for (Integer id : playListTrackIdsToDelete) {
+            deleteTrack(playList.getPlayListTracks(), id);
+        }
+
+        return this;
+    }
+
+    private static void deleteTrack(Set<PlayListTrack> playListTracks, final Integer playListTrackIdsToDelete) {
+        for (PlayListTrack playListTrack : playListTracks) {
+            if (playListTrack.getId() == playListTrackIdsToDelete) {
+                playListTracks.remove(playListTrack);
+                return;
+            }
+        }
     }
 
     private PlayListTrack createPlayListTrack(TrackPlayList playList, Track track, Date lastUpdated) {
