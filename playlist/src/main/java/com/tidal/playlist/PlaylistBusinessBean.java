@@ -29,43 +29,35 @@ public class PlaylistBusinessBean {
     }
 
     PlaylistBusinessBean addTracks(List<Track> tracksToAdd, int toIndex, Date lastUpdated) throws PlaylistException {
-        try {
-            if (isPlaylistFull(playList, tracksToAdd, maxNumTracks)) {
-                throw new PlaylistException("Playlist cannot have more than " + maxNumTracks + " tracks");
-            }
-
-            toIndex = handleIndexOutOfBounds(toIndex, playList);
-
-            if (!validateIndexes(playList, toIndex)) {
-                throw new PlaylistException("Playlist index is invalid. Can not add to index " + toIndex);
-            }
-
-            List<PlayListTrack> original = getOriginalPlayListTracksSorted(playList);
-
-            for (Track track : tracksToAdd) {
-                original.add(toIndex, createPlayListTrack(lastUpdated, playList, track));
-                playList.setDuration(addTrackDurationToPlaylist(playList, track));
-                toIndex++;
-            }
-
-            int i = 0;
-            for (PlayListTrack track : original) {
-                track.setIndex(i++);
-            }
-
-            playList.getPlayListTracks().clear();
-            playList.getPlayListTracks().addAll(original);
-            playList.setNrOfTracks(original.size());
-
-            return this;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new PlaylistException("Generic error");
+        if (isPlaylistFull(playList, tracksToAdd, maxNumTracks)) {
+            throw new PlaylistException("Playlist cannot have more than " + maxNumTracks + " tracks");
         }
+        toIndex = handleIndexOutOfBounds(playList, toIndex);
+
+        if (!isValidIndex(playList, toIndex)) {
+            throw new PlaylistException("Playlist index is invalid. Can not add to index " + toIndex);
+        }
+
+        List<PlayListTrack> original = getOriginalPlayListTracksSorted(playList);
+        for (Track track : tracksToAdd) {
+            original.add(toIndex, createPlayListTrack(playList, track, lastUpdated));
+            playList.setDuration(addTrackDurationToPlaylist(playList, track));
+            toIndex++;
+        }
+
+        int i = 0;
+        for (PlayListTrack track : original) {
+            track.setIndex(i++);
+        }
+
+        playList.getPlayListTracks().clear();
+        playList.getPlayListTracks().addAll(original);
+        playList.setNrOfTracks(original.size());
+
+        return this;
     }
 
-    private PlayListTrack createPlayListTrack(Date lastUpdated, TrackPlayList playList, Track track) {
+    private PlayListTrack createPlayListTrack(TrackPlayList playList, Track track, Date lastUpdated) {
         PlayListTrack playlistTrack = new PlayListTrack();
         playlistTrack.setTrack(track);
         playlistTrack.setTrackPlaylist(playList);
@@ -74,7 +66,7 @@ public class PlaylistBusinessBean {
         return playlistTrack;
     }
 
-    private List<PlayListTrack> getOriginalPlayListTracksSorted(TrackPlayList playList) {
+    private static List<PlayListTrack> getOriginalPlayListTracksSorted(TrackPlayList playList) {
         List<PlayListTrack> original = playList.getPlayListTracksSorted();
         if (original == null) {
             return new ArrayList<PlayListTrack>();
@@ -84,23 +76,23 @@ public class PlaylistBusinessBean {
         }
     }
 
-    private int handleIndexOutOfBounds(int toIndex, TrackPlayList playList) {
+    private static int handleIndexOutOfBounds(TrackPlayList playList, int index) {
         // The index is out of bounds, put it in the end of the list.
-        if (toIndex > playList.getPlayListTracksSize() || toIndex == -1) {
+        if (index > playList.getPlayListTracksSize() || index == -1) {
             return playList.getPlayListTracksSize();
         }
-        return toIndex;
+        return index;
     }
 
-    private boolean isPlaylistFull(TrackPlayList playList, List<Track> tracksToAdd, int maxNumTracks) {
-        return playList.getNrOfTracks() + tracksToAdd.size() > this.maxNumTracks;
+    private static boolean isPlaylistFull(TrackPlayList playList, List<Track> tracksToAdd, int maxNumTracks) {
+        return playList.getNrOfTracks() + tracksToAdd.size() > maxNumTracks;
     }
 
-    private boolean validateIndexes(TrackPlayList playlist, int toIndex) {
-        return toIndex <= playlist.getNrOfTracks() && toIndex >= 0;
+    private static boolean isValidIndex(TrackPlayList playlist, int index) {
+        return index <= playlist.getNrOfTracks() && index >= 0;
     }
 
-    private float addTrackDurationToPlaylist(TrackPlayList playList, Track track) {
+    private static float addTrackDurationToPlaylist(TrackPlayList playList, Track track) {
         return (track != null ? track.getDuration() : 0)
                 + (playList != null && playList.getDuration() != null ? playList.getDuration() : 0);
     }
