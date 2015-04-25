@@ -103,6 +103,30 @@ public class PlaylistBusinessBeanTest {
         assertThat(playListTracks.get(2).getTrack().getId(), is(100));
     }
 
+    @Test
+    public void setsAttributesOnPlayListTrack() throws Exception {
+        Track track = new Track();
+        track.setArtistId(4);
+        track.setTitle("test track");
+        track.setTrackNumberIdx(10);
+        track.setId(100);
+        track.setDuration(1.f);
+
+        List<Track> trackList = asList(track);
+
+        int maxNumTracks = 10;
+        int numTracksToGenerate = 0;
+        int toIndex = 0;
+        Date lastUpdated = new Date();
+        List<PlayListTrack> playListTracks = playlistBusinessBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, toIndex, lastUpdated).getPlayList().getPlayListTracksSorted();
+        PlayListTrack playListTrack = playListTracks.get(0);
+
+        assertThat(playListTrack.getTrackArtistId(), is(track.getArtistId()));
+        assertThat(playListTrack.getDateAdded().equals(lastUpdated), is(true));
+        assertThat(playListTrack.getTrack().getId(), is(track.getId()));
+    }
+
     @Test(expected = PlaylistException.class)
     public void throwsExceptionWhenExceedsMaxNumTracks() {
         List<Track> trackList = asList(track());
@@ -179,7 +203,7 @@ public class PlaylistBusinessBeanTest {
         track.setTitle("A brand new track");
         track.setTrackNumberIdx(1);
         track.setId(100);
-        track.setDuration((float)1.);
+        track.setDuration(1.f);
         return track;
     }
 
