@@ -3,6 +3,7 @@ package com.tidal.playlist;
 import com.tidal.playlist.dao.PlaylistDaoBean;
 import com.tidal.playlist.data.PlayListTrack;
 import com.tidal.playlist.data.Track;
+import com.tidal.playlist.data.TrackPlayList;
 import com.tidal.playlist.exception.PlaylistException;
 import org.junit.Test;
 
@@ -32,6 +33,7 @@ public class PlaylistBusinessBeanTest {
 
         assertThat(playListTracks.size(), is(1));
         assertThat(playListTracks.get(0).getTrack().getId(), is(100));
+        assertThat(playListTracks.get(0).getIndex(), is(0));
     }
 
     @Test
@@ -51,8 +53,13 @@ public class PlaylistBusinessBeanTest {
                 .addTracks(trackList, toIndex, new Date()).getPlayList().getPlayListTracksSorted();
 
         assertThat(playListTracks.size(), is(2));
+
         assertThat(playListTracks.get(0).getTrack().getId(), is(100));
+        assertThat(playListTracks.get(0).getIndex(), is(0));
+
         assertThat(playListTracks.get(1).getTrack().getId(), is(101));
+        assertThat(playListTracks.get(1).getIndex(), is(1));
+
     }
 
     @Test
@@ -69,6 +76,8 @@ public class PlaylistBusinessBeanTest {
 
         assertThat(playListTracks.size(), is(3));
         assertThat(playListTracks.get(0).getTrack().getId(), is(100));
+        assertThat(playListTracks.get(0).getIndex(), is(0));
+
     }
 
     @Test
@@ -85,6 +94,8 @@ public class PlaylistBusinessBeanTest {
 
         assertThat(playListTracks.size(), is(3));
         assertThat(playListTracks.get(1).getTrack().getId(), is(100));
+        assertThat(playListTracks.get(1).getIndex(), is(1));
+
     }
 
     @Test
@@ -101,6 +112,27 @@ public class PlaylistBusinessBeanTest {
 
         assertThat(playListTracks.size(), is(3));
         assertThat(playListTracks.get(2).getTrack().getId(), is(100));
+        assertThat(playListTracks.get(2).getIndex(), is(2));
+    }
+
+    @Test
+    public void updatesNumberOfTracksAttributeInPlaylist() {
+        Track track = track();
+        track.setId(100);
+        List<Track> trackList = asList(track);
+
+        int maxNumTracks = 10;
+        int numTracksToGenerate = 2;
+        int toIndex = 2;
+        PlaylistBusinessBean playlistBusinessBean = playlistBusinessBean(maxNumTracks, numTracksToGenerate);
+
+        int nrOfTracksBefore = playlistBusinessBean.getPlayList().getNrOfTracks();
+
+        TrackPlayList playList = playlistBusinessBean
+                .addTracks(trackList, toIndex, new Date()).getPlayList();
+
+        assertThat(nrOfTracksBefore, is(2));
+        assertThat(playList.getNrOfTracks(), is(3));
     }
 
     @Test
@@ -126,6 +158,7 @@ public class PlaylistBusinessBeanTest {
         assertThat(playListTrack.getDateAdded().equals(lastUpdated), is(true));
         assertThat(playListTrack.getTrack().getId(), is(track.getId()));
     }
+
 
     @Test(expected = PlaylistException.class)
     public void throwsExceptionWhenExceedsMaxNumTracks() {
