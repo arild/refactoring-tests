@@ -22,20 +22,16 @@ public class PlaylistBusinessBean {
                                   Date lastUpdated) throws PlaylistException {
 
         try {
-
             TrackPlayList playList = playlistDaoBean.getPlaylistByUUID(uuid, userId);
 
-            if (playList.getNrOfTracks() + tracksToAdd.size() > maxNumTracks) {
+            if (isPlaylistFull(playList, tracksToAdd, maxNumTracks)) {
                 throw new PlaylistException("Playlist cannot have more than " + maxNumTracks + " tracks");
             }
 
-            // The index is out of bounds, put it in the end of the list.
-            if (toIndex > playList.getPlayListTracksSize() || toIndex == -1) {
-                toIndex = playList.getPlayListTracksSize();
-            }
+            toIndex = handleIndexOutOfBounds(toIndex, playList);
 
-            if (!validateIndexes(toIndex, playList.getNrOfTracks())) {
-                return Collections.EMPTY_LIST;
+            if (!validateIndexes(playList, toIndex)) {
+                throw new PlaylistException("Playlist index is invalid. Can not add to index " + toIndex);
             }
 
             Set<PlayListTrack> originalSet = playList.getPlayListTracks();
@@ -75,8 +71,20 @@ public class PlaylistBusinessBean {
         }
     }
 
-    private boolean validateIndexes(int toIndex, int length) {
-        return toIndex >= 0 && toIndex <= length;
+    private int handleIndexOutOfBounds(int toIndex, TrackPlayList playList) {
+        // The index is out of bounds, put it in the end of the list.
+        if (toIndex > playList.getPlayListTracksSize() || toIndex == -1) {
+            return playList.getPlayListTracksSize();
+        }
+        return toIndex;
+    }
+
+    private boolean isPlaylistFull(TrackPlayList playList, List<Track> tracksToAdd, int maxNumTracks) {
+        return playList.getNrOfTracks() + tracksToAdd.size() > this.maxNumTracks;
+    }
+
+    private boolean validateIndexes(TrackPlayList playlist, int toIndex) {
+        return toIndex <= playlist.getNrOfTracks() && toIndex >= 0;
     }
 
     private float addTrackDurationToPlaylist(TrackPlayList playList, Track track) {

@@ -137,7 +137,7 @@ public class PlaylistBusinessBeanTest {
         track.setArtistId(4);
         track.setTitle("A brand new track");
         track.setTrackNumberIdx(1);
-        track.setId(76868);
+        track.setId(100);
 
         trackList.add(track);
 
@@ -155,7 +155,7 @@ public class PlaylistBusinessBeanTest {
         track.setArtistId(4);
         track.setTitle("A brand new track");
         track.setTrackNumberIdx(1);
-        track.setId(76868);
+        track.setId(100);
 
         trackList.add(track);
 
@@ -163,5 +163,46 @@ public class PlaylistBusinessBeanTest {
         int numTracksToGenerate = 5;
         new PlaylistBusinessBean(new PlaylistDaoBean(numTracksToGenerate), maxNumTracks)
                 .addTracks(UUID.randomUUID().toString(), 1, trackList, 5, new Date());
+    }
+
+    @Test(expected = PlaylistException.class)
+    public void throwsExceptionWhenAddingToNegativeIndex() throws Exception {
+        List<Track> trackList = new ArrayList<Track>();
+
+        Track track = new Track();
+        track.setArtistId(4);
+        track.setTitle("A brand new track");
+        track.setTrackNumberIdx(1);
+        track.setId(76868);
+
+        trackList.add(track);
+
+        int maxNumTracks = 10;
+        int numTracksToGenerate = 5;
+        new PlaylistBusinessBean(new PlaylistDaoBean(numTracksToGenerate), maxNumTracks)
+                .addTracks(UUID.randomUUID().toString(), 1, trackList, -10, new Date());
+
+    }
+
+    @Test
+    public void addsToEndOfPlaylistWhenIndexIsLargerThanMaxNumTracks() throws Exception {
+        List<Track> trackList = new ArrayList<Track>();
+
+        Track track = new Track();
+        track.setArtistId(4);
+        track.setTitle("A brand new track");
+        track.setTrackNumberIdx(1);
+        track.setId(100);
+
+        trackList.add(track);
+
+        int maxNumTracks = 10;
+        int numTracksToGenerate = 5;
+        List<PlayListTrack> playListTracks = new PlaylistBusinessBean(new PlaylistDaoBean(numTracksToGenerate), maxNumTracks)
+                .addTracks(UUID.randomUUID().toString(), 1, trackList, 20, new Date());
+
+        assertThat(playListTracks.size(), is(6));
+        assertThat(playListTracks.get(5).getTrack().getId(), is(100));
+
     }
 }
