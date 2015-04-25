@@ -10,16 +10,19 @@ import java.util.*;
 
 public class PlaylistBusinessBean {
 
+    private final int userId;
+    private final String uuid;
     private PlaylistDaoBean playlistDaoBean;
     private int maxNumTracks;
 
-    public PlaylistBusinessBean(PlaylistDaoBean playlistDaoBean, int maxNumTracks) {
+    public PlaylistBusinessBean(int userId, String uuid, PlaylistDaoBean playlistDaoBean, int maxNumTracks) {
+        this.userId = userId;
+        this.uuid = uuid;
         this.playlistDaoBean = playlistDaoBean;
         this.maxNumTracks = maxNumTracks;
     }
 
-    List<PlayListTrack> addTracks(String uuid, int userId, List<Track> tracksToAdd, int toIndex,
-                                  Date lastUpdated) throws PlaylistException {
+    List<PlayListTrack> addTracks(List<Track> tracksToAdd, int toIndex, Date lastUpdated) throws PlaylistException {
 
         try {
             TrackPlayList playList = playlistDaoBean.getPlaylistByUUID(uuid, userId);

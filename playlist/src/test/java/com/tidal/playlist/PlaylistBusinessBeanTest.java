@@ -6,11 +6,11 @@ import com.tidal.playlist.data.Track;
 import com.tidal.playlist.exception.PlaylistException;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
@@ -19,20 +19,14 @@ public class PlaylistBusinessBeanTest {
 
     @Test
     public void addsSingleTrackToEmptyPlaylist() {
-        List<Track> trackList = new ArrayList<Track>();
-
-        Track track = new Track();
-        track.setArtistId(4);
-        track.setTitle("A brand new track");
-        track.setTrackNumberIdx(1);
+        Track track = track();
         track.setId(100);
-
-        trackList.add(track);
+        List<Track> trackList = asList(track);
 
         int maxNumTracks = 10;
         int numTracksToGenerate = 0;
-        List<PlayListTrack> playListTracks = new PlaylistBusinessBean(new PlaylistDaoBean(numTracksToGenerate), maxNumTracks)
-                .addTracks(UUID.randomUUID().toString(), 1, trackList, 0, new Date());
+        List<PlayListTrack> playListTracks = playlistBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, 0, new Date());
 
         assertThat(playListTracks.size(), is(1));
         assertThat(playListTracks.get(0).getTrack().getId(), is(100));
@@ -40,26 +34,18 @@ public class PlaylistBusinessBeanTest {
 
     @Test
     public void addsMultipleTracksToEmptyPlaylist() {
-        List<Track> trackList = new ArrayList<Track>();
+        Track track1 = track();
+        track1.setId(100);
 
-        Track track = new Track();
-        track.setArtistId(4);
-        track.setTitle("A brand new track");
-        track.setTrackNumberIdx(1);
-        track.setId(100);
-        trackList.add(track);
+        Track track2 = track();
+        track2.setId(101);
 
-        track = new Track();
-        track.setArtistId(5);
-        track.setTitle("A brand new track");
-        track.setTrackNumberIdx(1);
-        track.setId(101);
-        trackList.add(track);
+        List<Track> trackList = asList(track1, track2);
 
         int maxNumTracks = 10;
         int numTracksToGenerate = 0;
-        List<PlayListTrack> playListTracks = new PlaylistBusinessBean(new PlaylistDaoBean(numTracksToGenerate), maxNumTracks)
-                .addTracks(UUID.randomUUID().toString(), 1, trackList, 0, new Date());
+        List<PlayListTrack> playListTracks = playlistBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, 0, new Date());
 
         assertThat(playListTracks.size(), is(2));
         assertThat(playListTracks.get(0).getTrack().getId(), is(100));
@@ -68,20 +54,14 @@ public class PlaylistBusinessBeanTest {
 
     @Test
     public void addsToBeginningOfPlaylist() {
-        List<Track> trackList = new ArrayList<Track>();
-
-        Track track = new Track();
-        track.setArtistId(4);
-        track.setTitle("A brand new track");
-        track.setTrackNumberIdx(1);
+        Track track = track();
         track.setId(100);
-
-        trackList.add(track);
+        List<Track> trackList = asList(track);
 
         int maxNumTracks = 10;
         int numTracksToGenerate = 2;
-        List<PlayListTrack> playListTracks = new PlaylistBusinessBean(new PlaylistDaoBean(numTracksToGenerate), maxNumTracks)
-                .addTracks(UUID.randomUUID().toString(), 1, trackList, 0, new Date());
+        List<PlayListTrack> playListTracks = playlistBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, 0, new Date());
 
         assertThat(playListTracks.size(), is(3));
         assertThat(playListTracks.get(0).getTrack().getId(), is(100));
@@ -89,20 +69,14 @@ public class PlaylistBusinessBeanTest {
 
     @Test
     public void addsToMiddleOfPlaylist() {
-        List<Track> trackList = new ArrayList<Track>();
-
-        Track track = new Track();
-        track.setArtistId(4);
-        track.setTitle("A brand new track");
-        track.setTrackNumberIdx(1);
+        Track track = track();
         track.setId(100);
-
-        trackList.add(track);
+        List<Track> trackList = asList(track);
 
         int maxNumTracks = 10;
         int numTracksToGenerate = 2;
-        List<PlayListTrack> playListTracks = new PlaylistBusinessBean(new PlaylistDaoBean(numTracksToGenerate), maxNumTracks)
-                .addTracks(UUID.randomUUID().toString(), 1, trackList, 1, new Date());
+        List<PlayListTrack> playListTracks = playlistBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, 1, new Date());
 
         assertThat(playListTracks.size(), is(3));
         assertThat(playListTracks.get(1).getTrack().getId(), is(100));
@@ -110,20 +84,14 @@ public class PlaylistBusinessBeanTest {
 
     @Test
     public void addsToEndOfPlaylist() {
-        List<Track> trackList = new ArrayList<Track>();
-
-        Track track = new Track();
-        track.setArtistId(4);
-        track.setTitle("A brand new track");
-        track.setTrackNumberIdx(1);
+        Track track = track();
         track.setId(100);
-
-        trackList.add(track);
+        List<Track> trackList = asList(track);
 
         int maxNumTracks = 10;
         int numTracksToGenerate = 2;
-        List<PlayListTrack> playListTracks = new PlaylistBusinessBean(new PlaylistDaoBean(numTracksToGenerate), maxNumTracks)
-                .addTracks(UUID.randomUUID().toString(), 1, trackList, 2, new Date());
+        List<PlayListTrack> playListTracks = playlistBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, 2, new Date());
 
         assertThat(playListTracks.size(), is(3));
         assertThat(playListTracks.get(2).getTrack().getId(), is(100));
@@ -131,78 +99,59 @@ public class PlaylistBusinessBeanTest {
 
     @Test(expected = PlaylistException.class)
     public void throwsExceptionWhenExceedsMaxNumTracks() {
-        List<Track> trackList = new ArrayList<Track>();
-
-        Track track = new Track();
-        track.setArtistId(4);
-        track.setTitle("A brand new track");
-        track.setTrackNumberIdx(1);
-        track.setId(100);
-
-        trackList.add(track);
+        List<Track> trackList = asList(track());
 
         int numTracksToGenerate = 10;
         int maxNumTracks = 10;
-        new PlaylistBusinessBean(new PlaylistDaoBean(numTracksToGenerate), maxNumTracks)
-                .addTracks(UUID.randomUUID().toString(), 1, trackList, 5, new Date());
+        playlistBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, 1, new Date());
     }
 
     @Test
     public void allowsAddingTracksUntilMaxNumTracks() {
-        List<Track> trackList = new ArrayList<Track>();
-
-        Track track = new Track();
-        track.setArtistId(4);
-        track.setTitle("A brand new track");
-        track.setTrackNumberIdx(1);
-        track.setId(100);
-
-        trackList.add(track);
+        List<Track> trackList = asList(track());
 
         int maxNumTracks = 10;
         int numTracksToGenerate = 5;
-        new PlaylistBusinessBean(new PlaylistDaoBean(numTracksToGenerate), maxNumTracks)
-                .addTracks(UUID.randomUUID().toString(), 1, trackList, 5, new Date());
+        playlistBean(maxNumTracks, numTracksToGenerate).addTracks(trackList, 5, new Date());
     }
 
     @Test(expected = PlaylistException.class)
     public void throwsExceptionWhenAddingToNegativeIndex() throws Exception {
-        List<Track> trackList = new ArrayList<Track>();
-
-        Track track = new Track();
-        track.setArtistId(4);
-        track.setTitle("A brand new track");
-        track.setTrackNumberIdx(1);
-        track.setId(76868);
-
-        trackList.add(track);
+        List<Track> trackList = asList(track());
 
         int maxNumTracks = 10;
         int numTracksToGenerate = 5;
-        new PlaylistBusinessBean(new PlaylistDaoBean(numTracksToGenerate), maxNumTracks)
-                .addTracks(UUID.randomUUID().toString(), 1, trackList, -10, new Date());
+        playlistBean(maxNumTracks, numTracksToGenerate).addTracks(trackList, -10, new Date());
 
     }
 
     @Test
     public void addsToEndOfPlaylistWhenIndexIsLargerThanMaxNumTracks() throws Exception {
-        List<Track> trackList = new ArrayList<Track>();
+        Track track = track();
+        track.setId(100);
+        List<Track> trackList = asList(track);
 
+        int maxNumTracks = 10;
+        int numTracksToGenerate = 5;
+        List<PlayListTrack> playListTracks = playlistBean(maxNumTracks, numTracksToGenerate)
+                .addTracks(trackList, 20, new Date());
+
+        assertThat(playListTracks.size(), is(6));
+        assertThat(playListTracks.get(5).getTrack().getId(), is(100));
+
+    }
+
+    private Track track() {
         Track track = new Track();
         track.setArtistId(4);
         track.setTitle("A brand new track");
         track.setTrackNumberIdx(1);
         track.setId(100);
+        return track;
+    }
 
-        trackList.add(track);
-
-        int maxNumTracks = 10;
-        int numTracksToGenerate = 5;
-        List<PlayListTrack> playListTracks = new PlaylistBusinessBean(new PlaylistDaoBean(numTracksToGenerate), maxNumTracks)
-                .addTracks(UUID.randomUUID().toString(), 1, trackList, 20, new Date());
-
-        assertThat(playListTracks.size(), is(6));
-        assertThat(playListTracks.get(5).getTrack().getId(), is(100));
-
+    private PlaylistBusinessBean playlistBean(int maxNumTracks, int numTracksToGenerate) {
+        return new PlaylistBusinessBean(1, UUID.randomUUID().toString(), new PlaylistDaoBean(numTracksToGenerate), maxNumTracks);
     }
 }
