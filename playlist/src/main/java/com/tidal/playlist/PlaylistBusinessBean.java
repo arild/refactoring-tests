@@ -9,7 +9,6 @@ import com.tidal.playlist.exception.PlaylistException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 public class PlaylistBusinessBean {
 
@@ -46,30 +45,35 @@ public class PlaylistBusinessBean {
             toIndex++;
         }
 
-        int i = 0;
-        for (PlayListTrack track : original) {
-            track.setIndex(i++);
-        }
+        updateAllIndexes(original);
 
         playList.getPlayListTracks().clear();
         playList.getPlayListTracks().addAll(original);
         playList.setNrOfTracks(original.size());
-
         return this;
     }
 
     PlaylistBusinessBean deleteTracks(List<Integer> playListTrackIdsToDelete) {
         for (Integer id : playListTrackIdsToDelete) {
-            deleteTrack(playList.getPlayListTracks(), id);
+            deleteTrack(playList, id);
         }
-
+        updateAllIndexes(playList.getPlayListTracksSorted());
         return this;
     }
 
-    private static void deleteTrack(Set<PlayListTrack> playListTracks, final Integer playListTrackIdsToDelete) {
-        for (PlayListTrack playListTrack : playListTracks) {
+    private static void updateAllIndexes(List<PlayListTrack> tracks) {
+        int i = 0;
+        for (PlayListTrack track : tracks) {
+            track.setIndex(i++);
+        }
+    }
+
+    private static void deleteTrack(TrackPlayList playList, final Integer playListTrackIdsToDelete) {
+        for (PlayListTrack playListTrack : playList.getPlayListTracks()) {
             if (playListTrack.getId() == playListTrackIdsToDelete) {
-                playListTracks.remove(playListTrack);
+                playList.getPlayListTracks().remove(playListTrack);
+                float duration = subtractTrackDurationToPlaylist(playList, playListTrack.getTrack());
+                playList.setDuration(duration);
                 return;
             }
         }
@@ -81,6 +85,7 @@ public class PlaylistBusinessBean {
         playlistTrack.setTrackPlaylist(playList);
         playlistTrack.setTrackArtistId(track.getArtistId());
         playlistTrack.setDateAdded(lastUpdated);
+        playlistTrack.setId(track.getId()); // Should use uuid, or incrementing counter for this user
         return playlistTrack;
     }
 
@@ -111,7 +116,19 @@ public class PlaylistBusinessBean {
     }
 
     private static float addTrackDurationToPlaylist(TrackPlayList playList, Track track) {
-        return (track != null ? track.getDuration() : 0)
-                + (playList != null && playList.getDuration() != null ? playList.getDuration() : 0);
+        return getPlayListDuration(playList) + getTrackDuration(track);
+    }
+
+    private static float subtractTrackDurationToPlaylist(TrackPlayList playList, Track track) {
+        return getPlayListDuration(playList) - getTrackDuration(track);
+
+    }
+
+    private static float getTrackDuration(Track track) {
+        return track != null ? track.getDuration() : 0;
+    }
+
+    private static float getPlayListDuration(TrackPlayList playList) {
+        return playList != null && playList.getDuration() != null ? playList.getDuration() : 0;
     }
 }
