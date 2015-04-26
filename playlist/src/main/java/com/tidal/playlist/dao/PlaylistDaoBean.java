@@ -22,9 +22,11 @@ import java.util.Set;
 public class PlaylistDaoBean {
 
     private final int numTracksToGenerate;
+    private int playListTrackIdToStartFrom;
 
-    public PlaylistDaoBean(int numTracksToGenerate) {
+    public PlaylistDaoBean(int numTracksToGenerate, int playListTrackIdToStartFrom) {
         this.numTracksToGenerate = numTracksToGenerate;
+        this.playListTrackIdToStartFrom = playListTrackIdToStartFrom;
     }
 
     public TrackPlayList getPlaylistByUUID(String uuid, int userId) {
@@ -37,7 +39,7 @@ public class PlaylistDaoBean {
         trackPlayList.setLastUpdated(new Date());
         trackPlayList.setNrOfTracks(numTracksToGenerate);
         trackPlayList.setPlayListName("Collection of great songs");
-        trackPlayList.setPlayListTracks(getPlaylistTracks(numTracksToGenerate));
+        trackPlayList.setPlayListTracks(getPlaylistTracks(numTracksToGenerate, playListTrackIdToStartFrom));
         trackPlayList.setUserId(userId);
         trackPlayList.setSharingLevel(SharingLevel.PUBLIC);
         trackPlayList.setUuid(uuid);
@@ -45,14 +47,14 @@ public class PlaylistDaoBean {
         return trackPlayList;
     }
 
-    private static Set<PlayListTrack> getPlaylistTracks(int numTracksToGenerate) {
+    private static Set<PlayListTrack> getPlaylistTracks(int numTracksToGenerate, int playListTrackIdToStartFrom) {
 
         Set<PlayListTrack> playListTracks = new HashSet<PlayListTrack>();
         for (int i = 0; i < numTracksToGenerate; i++) {
             PlayListTrack playListTrack = new PlayListTrack();
             playListTrack.setDateAdded(new Date());
             playListTrack.setDescription("A description");
-            playListTrack.setId(i + 1);
+            playListTrack.setId(playListTrackIdToStartFrom + i);
             playListTrack.setIndex(i);
             playListTrack.setSharingLevel(SharingLevel.PUBLIC);
             playListTrack.setTrack(getTrack());

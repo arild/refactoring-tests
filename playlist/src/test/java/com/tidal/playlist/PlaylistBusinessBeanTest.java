@@ -314,6 +314,7 @@ public class PlaylistBusinessBeanTest {
     }
 
     private PlaylistDaoBean playlistDaoBean(int numTracksToGenerate) {
-        return new PlaylistDaoBean(numTracksToGenerate);
+        int playListTrackIdToStartFrom = 1;
+        return new PlaylistDaoBean(numTracksToGenerate, playListTrackIdToStartFrom);
     }
 }
